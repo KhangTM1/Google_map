@@ -1,16 +1,17 @@
-//API key AIzaSyBN2H70aAsosDe8q8Gl1EmpQxBKDJGw_Cs
-//Tọa độ ban đầu : 20.964294723446642, 105.82747679824756
-//Tọa độ đích : 20.960812885804707, 105.74673021200734
+// //API key AIzaSyBN2H70aAsosDe8q8Gl1EmpQxBKDJGw_Cs
+// //Tọa độ ban đầu : 20.964294723446642, 105.82747679824756
+// //Tọa độ đích : 20.960812885804707, 105.74673021200734
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:convert';
 
-import 'authentication_screen.dart';
+import 'package:flutter_uber_location/component/log_out_button.dart';
+import '../component/select_destination.dart';
+import '../component/Directions.dart';
 
 class MapScreen extends StatefulWidget {
   @override
@@ -44,15 +45,21 @@ class _MapScreenState extends State<MapScreen> {
       String baseUrl = 'https://maps.googleapis.com/maps/api';
 
       // Get current address
-      String currentAddress = await _getAddressFromLatLng(_currentPosition!.latitude, _currentPosition!.longitude);
+      // String currentAddress = await _getAddressFromLatLng(_currentPosition!.latitude, _currentPosition!.longitude);
+      //
+      // // Get destination address
+      // String destinationAddress = await _getAddressFromLatLng(_destination!.latitude, _destination!.longitude);
+      String currentAddress = await _getAddressFromLatLng(20.964294723446642, 105.82747679824756);
 
       // Get destination address
-      String destinationAddress = await _getAddressFromLatLng(_destination!.latitude, _destination!.longitude);
+      String destinationAddress = await _getAddressFromLatLng(20.960812885804707, 105.74673021200734);
 
       // Get directions
       String directionsUrl =
           '$baseUrl/directions/json?origin=${_currentPosition!.latitude},${_currentPosition!.longitude}&destination=${_destination!.latitude},${_destination!.longitude}&key=$apiKey';
       http.Response response = await http.get(Uri.parse(directionsUrl));
+      print(response.body);
+
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
@@ -63,14 +70,12 @@ class _MapScreenState extends State<MapScreen> {
         polylinePoints.map((point) => LatLng(point.latitude, point.longitude)).toList();
 
         setState(() {
-          Polyline polyline = Polyline(
+          _polylines.add(Polyline(
             polylineId: PolylineId('route'),
             points: decodedPolyline,
             color: Colors.blue,
             width: 3,
-          );
-
-          _polylines.add(polyline);
+          ));
         });
 
         print('Current Address: $currentAddress');
@@ -93,12 +98,19 @@ class _MapScreenState extends State<MapScreen> {
     return '';
   }
 
-  void _logOut() async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacement(
+  void _selectDestination() {
+    Navigator.push(
       context,
-      MaterialPageRoute(builder: (context)
-      => AuthenticationScreen()),
+      MaterialPageRoute(
+        builder: (context) => SelectDestination(
+          onDestinationSelected: (LatLng destination) {
+            setState(() {
+              _destination = destination;
+            });
+            _getDirections();
+          },
+        ),
+      ),
     );
   }
 
@@ -108,26 +120,37 @@ class _MapScreenState extends State<MapScreen> {
       appBar: AppBar(
         title: Text('Google Map Clone'),
         actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: _logOut,
-          ),
+          LogoutButton(),
         ],
       ),
       body: Stack(
         children: [
-          GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: LatLng(37.42796133580664, -122.085749655962),
-              zoom: 14,
+          if (_currentPosition != null) // Kiểm tra xem _currentPosition có giá trị hay không
+            GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+                zoom: 14,
+              ),
+              polylines: _polylines,
+              markers: {
+                if (_currentPosition != null)
+                  Marker(
+                    markerId: MarkerId('currentLocation'),
+                    position: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+                    icon: BitmapDescriptor.defaultMarker, // Biểu tượng mặc định cho vị trí hiện tại
+                  ),
+                if (_destination != null)
+                  Marker(
+                    markerId: MarkerId('destination'),
+                    position: _destination!,
+                  ),
+              },
+              onMapCreated: (GoogleMapController controller) {
+                _mapController = controller;
+              },
             ),
-            polylines: _polylines,
-            onMapCreated: (GoogleMapController controller) {
-              _mapController = controller;
-            },
-          ),
           Positioned(
-            top: 20,
+            top: 5,
             left: 20,
             right: 20,
             child: Container(
@@ -138,7 +161,8 @@ class _MapScreenState extends State<MapScreen> {
               ),
               child: Center(
                 child: Text(
-                  'Current Location: ${_currentPosition != null ? "${_currentPosition!.latitude}, ${_currentPosition!.longitude}" : "Unknown"}',
+                  // 'Current Location: ${_currentPosition != null ? "${_currentPosition!.latitude}, ${_currentPosition!.longitude}" : "Unknown"}',
+                  'srearch on Google Maps',
                   style: TextStyle(fontSize: 16),
                 ),
               ),
@@ -149,15 +173,19 @@ class _MapScreenState extends State<MapScreen> {
             left: 20,
             right: 20,
             child: ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _destination = LatLng(37.43296265331129, -122.08832357078792);
-                  _getDirections();
-                });
-              },
-              child: Text('Get Directions'),
+              onPressed: _selectDestination,
+              child: Text('Select Destination'),
             ),
           ),
+          if (_polylines.isNotEmpty)
+            Positioned(
+              top: 20,
+              left: 20,
+              right: 20,
+              child: Directions(
+                polylines: _polylines,
+              ),
+            ),
         ],
       ),
     );

@@ -50,18 +50,19 @@ dev_dependencies:
   firebase_core: ^2.12.0
   firebase_auth: ^4.6.0
   cloud_firestore: ^4.7.0
+  location: ^4.4.0
+  geolocator: ^9.0.2
   shared_preferences: ^2.1.1
+  permission_handler: ^10.2.0
   google_maps_flutter: ^2.2.6
+  google_directions_api: ^0.9.1
   flutter_polyline_points: ^1.0.0
   google_maps_services_dart: ^1.17.1
 #  google_maps_services: ^1.1.0
-#  location: ^4.4.0
 #  google_maps_flutter_web: ^0.4.0+8
 #  url_launcher: ^6.1.5
 #  flutter_google_maps: ^4.0.0
 #  google_maps_webservice: ^0.0.19
-  google_directions_api: ^0.9.1
-  geolocator: ^9.0.2
 #  polyline: ^1.0.2
 
 
@@ -77,9 +78,10 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - location_icon.png
+#     - images/a_dot_burr.jpeg
+#     - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
