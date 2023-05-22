@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-// import'package:flutter_uber_location/screen/authentication_screen.dart';
+import'package:flutter_uber_location/screen/authentication_screen.dart';
 import 'package:flutter_uber_location/screen/map_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,8 +16,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MapScreen(),
-      // home: AuthenticationScreen(),
+      // home: MapScreen(),
+      home: AuthenticationScreen(),
     );
   }
 }

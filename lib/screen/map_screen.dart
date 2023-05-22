@@ -45,14 +45,14 @@ class _MapScreenState extends State<MapScreen> {
       String baseUrl = 'https://maps.googleapis.com/maps/api';
 
       // Get current address
-      // String currentAddress = await _getAddressFromLatLng(_currentPosition!.latitude, _currentPosition!.longitude);
-      //
-      // // Get destination address
-      // String destinationAddress = await _getAddressFromLatLng(_destination!.latitude, _destination!.longitude);
-      String currentAddress = await _getAddressFromLatLng(20.964294723446642, 105.82747679824756);
+      String currentAddress = await _getAddressFromLatLng(_currentPosition!.latitude, _currentPosition!.longitude);
 
       // Get destination address
-      String destinationAddress = await _getAddressFromLatLng(20.960812885804707, 105.74673021200734);
+      String destinationAddress = await _getAddressFromLatLng(_destination!.latitude, _destination!.longitude);
+      // String currentAddress = await _getAddressFromLatLng(20.964294723446642, 105.82747679824756);
+      //
+      // // Get destination address
+      // String destinationAddress = await _getAddressFromLatLng(20.960812885804707, 105.74673021200734);
 
       // Get directions
       String directionsUrl =
